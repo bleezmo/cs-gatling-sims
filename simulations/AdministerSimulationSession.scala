@@ -9,11 +9,8 @@ import assertions._
 
 class AdministerSimulationSession extends Simulation {
   // Optional, let's you drive a testplan with parameters from our UI
-  val threads   = Integer.getInteger("threads", 1200)
-  val rampup    = Integer.getInteger("rampup", 60).toLong
- 
-  val port      = Integer.getInteger("port", 80)
-  val path      = System.getProperty("path")
+  val users   = Integer.getInteger("threads", 1)
+  val rampup    = Integer.getInteger("rampup", 1).toLong
  
   // MANDATORY
   val testguid  = List(System.getProperty("testguid"))
@@ -107,7 +104,7 @@ class AdministerSimulationSession extends Simulation {
 	)
 
 
-	val scn = scenario("Scenario Name")
+	val scn = scenario("Administer Item Player")
 		.exec(http("request_1")
 					.get("/player.js")
 					.queryParam("""apiClientId""", """502d46ce0364068384f217a4""")
@@ -156,15 +153,6 @@ class AdministerSimulationSession extends Simulation {
 					.headers(headers_9)
 					.check(status.in(Seq(200,304)))
 			)
-		.pause(16 milliseconds)
-		.exec(http("request_10")
-					.get("/assets/qti-interactions--1955913016.min.gz.css")
-					.headers(headers_10)
-			)
-		.exec(http("request_11")
-					.get("/assets/qti-interactions-383132690.min.gz.js")
-					.headers(headers_11)
-			)
 		.pause(55 milliseconds)
 		.exec(http("request_12")
 					.get("/assets/js/vendor/angular-ui/fork-test/angular-ui.min.js")
@@ -176,21 +164,12 @@ class AdministerSimulationSession extends Simulation {
 					.headers(headers_13)
 					.check(status.in(Seq(200,304)))
 			)
-		.pause(37 milliseconds)
-		.exec(http("request_14")
-					.get("/assets/cs-common-234989643.min.gz.js")
-					.headers(headers_14)
-			)
-		.pause(20 milliseconds)
-		.exec(http("request_15")
-					.get("/assets/common--649440441.min.gz.js")
-					.headers(headers_15)
-			)
 		.pause(688 milliseconds)
 		.exec(http("request_16")
 					.post("/player/api/502282bce4b05b57849d303b/session")
 					.headers(headers_16)
-						.body("""{}""").asJSON
+					.body("""{}""").asJSON
+					.check(regex(""""id":"(\w{24})"""").saveAs("sessionId"))
 			)
 		.pause(529 milliseconds)
 		.exec(http("request_17")
@@ -198,9 +177,9 @@ class AdministerSimulationSession extends Simulation {
 					.headers(headers_17)
 					.check(status.in(Seq(200,304)))
 			)
-		.pause(42)
+		.pause(10)
 		.exec(http("request_18")
-					.put("/player/api/502282bce4b05b57849d303b/session/519a2269e4b07118d0ad6316")
+					.put("/player/api/502282bce4b05b57849d303b/session/${sessionId}")
 					.headers(headers_16)
 						.body("""{"id":"519a2269e4b07118d0ad6316","itemId":"502282bce4b05b57849d303b","responses":[{"id":"Q_01","value":"i'm guessing a reaction occurs"}],"settings":{"maxNoOfAttempts":1,"highlightUserResponse":true,"highlightCorrectResponse":true,"showFeedback":true,"allowEmptyResponses":false,"submitCompleteMessage":"Ok! Your response was submitted.","submitIncorrectMessage":"You may revise your work before you submit your final response."}}""").asJSON
 			)
@@ -209,5 +188,5 @@ class AdministerSimulationSession extends Simulation {
 					.get("/assets/images/info-icon-37x37.png")
 			)
 
-	setUp(scn.users(threads).ramp(rampup).protocolConfig(httpConf))
+	setUp(scn.users(users).ramp(rampup).protocolConfig(httpConf))
 }
